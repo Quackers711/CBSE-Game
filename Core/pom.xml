@@ -45,6 +45,11 @@
                 <version>6.2.15</version>
                 <scope>compile</scope>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>Common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
     </dependencies>
 
     <build>
