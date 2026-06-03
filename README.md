@@ -20,12 +20,6 @@ Run the scoring microservice in a separate terminal before starting the game:
 mvn -pl ScoringService exec:java
 ```
 
-You can also run the built JAR directly after `mvn clean install`:
-
-```bash
-java -cp ScoringService/target/ScoringService-1.0-SNAPSHOT.jar dk.quack.cbse.scoringservice.ScoringServiceMain
-```
-
 The service prints `Scoring service listening on http://127.0.0.1:8080` when it is ready.
 The game posts score increments to `http://127.0.0.1:8080` through Spring
 `RestTemplate`. If the scoring service is not running, the game continues with its local
