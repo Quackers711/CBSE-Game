@@ -12,6 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <module.output.directory>../mods-mvn</module.output.directory>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -70,7 +71,7 @@
                         <argument>--class-path=libs/*</argument>
                         <argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:8000</argument>
                         <argument>--module=Core/dk.quack.cbse.Main</argument>
-                        <argument>--add-modules=javafx.graphics</argument>
+                        <argument>--add-modules=javafx.graphics,Player,Bullet,Asteroids,Collision</argument>
                     </arguments>
                 </configuration>
             </plugin>
@@ -96,6 +97,9 @@
                                 </fileset>
                                 <fileset>
                                     <directory>libs</directory>
+                                </fileset>
+                                <fileset>
+                                    <directory>plugins</directory>
                                 </fileset>
                             </filesets>
                         </configuration>
@@ -131,7 +135,7 @@
                                             <type>jar</type>
                                         </artifactItem>
                                     </artifactItems>
-                                    <outputDirectory>../mods-mvn</outputDirectory>
+                                    <outputDirectory>${module.output.directory}</outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>

@@ -3,11 +3,11 @@ package dk.quack.cbse;
 import dk.quack.cbse.common.services.IEntityProcessingService;
 import dk.quack.cbse.common.services.IGamePluginService;
 import dk.quack.cbse.common.services.IPostEntityProcessingService;
+import dk.quack.cbse.common.util.ServiceLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
-import java.util.ServiceLoader;
 
 @Configuration
 public class ModuleConfig {
@@ -37,8 +37,6 @@ public class ModuleConfig {
     }
 
     private static <T> List<T> loadAll(Class<T> serviceType) {
-        return ServiceLoader.load(serviceType).stream()
-                .map(ServiceLoader.Provider::get)
-                .toList();
+        return ServiceLocator.INSTANCE.locateAll(serviceType);
     }
 }

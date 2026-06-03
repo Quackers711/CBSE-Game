@@ -4,26 +4,33 @@ import java.lang.module.Configuration;
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 public enum ServiceLocator {
 
     INSTANCE;
 
-    private static final Map<Class, ServiceLoader> loadermap = new HashMap<>();
+    private static final Map<Class<?>, List<?>> serviceCache = new LinkedHashMap<>();
     private final ModuleLayer layer;
 
     ServiceLocator() {
+        Path pluginsDir = Paths.get("plugins");
+        if (!Files.isDirectory(pluginsDir)) {
+            layer = null;
+            return;
+        }
+
         try {
-            Path pluginsDir = Paths.get("plugins"); // Directory with plugins JARs
-
-            // Search for plugins in the plugins directory
             ModuleFinder pluginsFinder = ModuleFinder.of(pluginsDir);
-
-            // Find all names of all found plugin modules
             List<String> plugins = pluginsFinder
                     .findAll()
                     .stream()
@@ -31,45 +38,49 @@ public enum ServiceLocator {
                     .map(ModuleDescriptor::name)
                     .collect(Collectors.toList());
 
-            // Create configuration that will resolve plugin modules
-            // (verify that the graph of modules is correct)
+            if (plugins.isEmpty()) {
+                layer = null;
+                return;
+            }
+
             Configuration pluginsConfiguration = ModuleLayer
                     .boot()
                     .configuration()
                     .resolve(pluginsFinder, ModuleFinder.of(), plugins);
 
-            // Create a module layer for plugins
             layer = ModuleLayer
                     .boot()
                     .defineModulesWithOneLoader(pluginsConfiguration, ClassLoader.getSystemClassLoader());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
-
+    @SuppressWarnings("unchecked")
     public <T> List<T> locateAll(Class<T> service) {
-        ServiceLoader<T> loader = loadermap.get(service);
-
-        if (loader == null) {
-            loader = ServiceLoader.load(layer, service);
-            loadermap.put(service, loader);
+        List<T> cachedServices = (List<T>) serviceCache.get(service);
+        if (cachedServices != null) {
+            return cachedServices;
         }
 
-        List<T> list = new ArrayList<T>();
-
-        if (loader != null) {
-            try {
-                for (T instance : loader) {
-                    list.add(instance);
-                }
-            } catch (ServiceConfigurationError serviceError) {
-                serviceError.printStackTrace();
-            }
+        Map<String, T> services = new LinkedHashMap<>();
+        addServices(services, ServiceLoader.load(service));
+        if (layer != null) {
+            addServices(services, ServiceLoader.load(layer, service));
         }
 
-        return list;
+        List<T> locatedServices = List.copyOf(services.values());
+        serviceCache.put(service, locatedServices);
+        return locatedServices;
     }
 
+    private static <T> void addServices(Map<String, T> services, ServiceLoader<T> loader) {
+        try {
+            for (T instance : loader) {
+                services.putIfAbsent(instance.getClass().getName(), instance);
+            }
+        } catch (ServiceConfigurationError serviceError) {
+            serviceError.printStackTrace();
+        }
+    }
 }
