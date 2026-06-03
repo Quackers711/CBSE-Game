@@ -14,6 +14,12 @@ Run the JavaFX game:
 mvn exec:exec
 ```
 
+Run the tests:
+
+```bash
+mvn test
+```
+
 ## JPMS Plugin Layer
 
 The game uses normal JPMS services for the core gameplay components and a separate
@@ -28,3 +34,12 @@ but its JAR is copied to `plugins/` instead of `mods-mvn/`.
 To demonstrate replacement or removal without recompiling `Core`, rebuild with
 `mvn clean install`, then remove or replace `plugins/Enemy-1.0-SNAPSHOT.jar` before
 running `mvn exec:exec`.
+
+## Tests
+
+The TestLab tests cover the core component contracts at unit level:
+
+- `Common`: world storage and filtering by entity type.
+- `Player`: player movement from input and frame delta.
+- `Bullet`: bullet creation and movement.
+- `Collision`: radius-based collision checks and enemy destruction scoring.
