@@ -46,7 +46,7 @@ public enum ServiceLocator {
             Configuration pluginsConfiguration = ModuleLayer
                     .boot()
                     .configuration()
-                    .resolve(pluginsFinder, ModuleFinder.of(), plugins);
+                    .resolve(pluginsFinder, ModuleFinder.of(Paths.get("mods-mvn")), plugins);
 
             layer = ModuleLayer
                     .boot()

@@ -105,7 +105,7 @@
                         <argument>--class-path=libs/*</argument>
                         <argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:8000</argument>
                         <argument>--module=Core/dk.quack.cbse.Main</argument>
-                        <argument>--add-modules=javafx.graphics,Player,Bullet,Asteroids,Collision</argument>
+                        <argument>--add-modules=javafx.graphics,Asteroids,Collision</argument>
                     </arguments>
                 </configuration>
             </plugin>
