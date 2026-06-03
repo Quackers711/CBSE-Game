@@ -1,6 +1,8 @@
 module Core {
     requires javafx.controls;
     requires spring.context;
+    requires spring.web;
+    requires micrometer.observation;
     requires Common;
 
     uses dk.quack.cbse.common.services.IGamePluginService;

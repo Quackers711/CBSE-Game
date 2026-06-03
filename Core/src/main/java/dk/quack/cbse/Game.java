@@ -7,6 +7,7 @@ import dk.quack.cbse.common.data.World;
 import dk.quack.cbse.common.services.IEntityProcessingService;
 import dk.quack.cbse.common.services.IGamePluginService;
 import dk.quack.cbse.common.services.IPostEntityProcessingService;
+import dk.quack.cbse.scoring.ScoreClient;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -30,15 +31,19 @@ public class Game {
     private final List<IGamePluginService> gamePluginServices;
     private final List<IEntityProcessingService> entityProcessingServices;
     private final List<IPostEntityProcessingService> postEntityProcessingServices;
+    private final ScoreClient scoreClient;
+    private int syncedScore;
 
     public Game(
             List<IGamePluginService> gamePluginServices,
             List<IEntityProcessingService> entityProcessingServices,
-            List<IPostEntityProcessingService> postEntityProcessingServices
+            List<IPostEntityProcessingService> postEntityProcessingServices,
+            ScoreClient scoreClient
     ) {
         this.gamePluginServices = gamePluginServices;
         this.entityProcessingServices = entityProcessingServices;
         this.postEntityProcessingServices = postEntityProcessingServices;
+        this.scoreClient = scoreClient;
     }
 
     public void start(Stage window) {
@@ -54,6 +59,7 @@ public class Game {
         for (IGamePluginService pluginService : gamePluginServices) {
             pluginService.start(gameData, world);
         }
+        scoreClient.reset();
 
         window.setScene(scene);
         window.setTitle("CBSE Asteroids");
@@ -86,6 +92,16 @@ public class Game {
         }
         for (IPostEntityProcessingService postProcessingService : postEntityProcessingServices) {
             postProcessingService.process(gameData, world);
+        }
+        syncScore();
+    }
+
+    private void syncScore() {
+        int currentScore = gameData.getScore();
+        int delta = currentScore - syncedScore;
+        if (delta > 0) {
+            scoreClient.addScore(delta);
+            syncedScore = currentScore;
         }
     }
 
