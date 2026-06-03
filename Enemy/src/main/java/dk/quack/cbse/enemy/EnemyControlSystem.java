@@ -32,7 +32,7 @@ public class EnemyControlSystem implements IEntityProcessingService {
 
             long now = System.currentTimeMillis();
             if (player != null && now - lastShot > 1_200) {
-                ServiceLoader.load(BulletSPI.class).stream()
+                bulletServices().stream()
                         .map(ServiceLoader.Provider::get)
                         .min(Comparator.comparing(provider -> provider.getClass().getName()))
                         .ifPresent(bulletSPI -> world.addEntity(bulletSPI.createBullet(enemy, gameData)));
@@ -49,5 +49,13 @@ public class EnemyControlSystem implements IEntityProcessingService {
             return value - max;
         }
         return value;
+    }
+
+    private static ServiceLoader<BulletSPI> bulletServices() {
+        ModuleLayer layer = EnemyControlSystem.class.getModule().getLayer();
+        if (layer == null) {
+            return ServiceLoader.load(BulletSPI.class);
+        }
+        return ServiceLoader.load(layer, BulletSPI.class);
     }
 }

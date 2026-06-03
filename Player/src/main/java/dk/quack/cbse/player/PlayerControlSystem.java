@@ -31,7 +31,7 @@ public class PlayerControlSystem implements IEntityProcessingService {
                 player.setDy(clamp(player.getDy() + Math.sin(radians) * THRUST * dt, -MAX_SPEED, MAX_SPEED));
             }
             if (gameData.getKeys().isPressed(GameKeys.SPACE)) {
-                for (BulletSPI bulletSPI : ServiceLoader.load(BulletSPI.class)) {
+                for (BulletSPI bulletSPI : bulletServices()) {
                     world.addEntity(bulletSPI.createBullet(player, gameData));
                 }
             }
@@ -53,5 +53,13 @@ public class PlayerControlSystem implements IEntityProcessingService {
 
     private static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private static Iterable<BulletSPI> bulletServices() {
+        ModuleLayer layer = PlayerControlSystem.class.getModule().getLayer();
+        if (layer == null) {
+            return ServiceLoader.load(BulletSPI.class);
+        }
+        return ServiceLoader.load(layer, BulletSPI.class);
     }
 }
